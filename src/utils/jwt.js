@@ -1,16 +1,16 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/env');
+const { jwtSecret, expiresIn } = require('../config/env');
 
 const generateToken = (user) => {
     return jwt.sign(
         { id: user.id, role: user.role },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
+        jwtSecret,
+        { expiresIn: expiresIn }
     );
 };
 
 const verifyToken = (token) => {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, jwtSecret);
 };
 
 module.exports = { generateToken, verifyToken };

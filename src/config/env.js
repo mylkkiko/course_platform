@@ -8,6 +8,8 @@ module.exports = {
         user: process.env.DB_USER,
         name: process.env.DB_NAME,
         password: process.env.DB_PASSWORD,
-        database: process.env.DB_DEFAULT
-    }
+        database: process.env.DB_DEFAULT,
+    },
+    jwtSecret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN
 };
