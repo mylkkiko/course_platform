@@ -3,6 +3,7 @@ const AppError = require('../utils/AppError');
 const { User } = require('../models');
 const USER_ERRORS = require('../constants/errors/user.errors');
 const bcrypt = require('bcrypt');
+const { generateToken } = require('../utils/jwt');
 
 const register = async({fullName, email, password}) => {
     if(!password || password.length < 6) {
@@ -18,4 +19,17 @@ const register = async({fullName, email, password}) => {
     return safeUser;
 }
 
-module.exports = { register };
+const login = async({email, password}) => {
+    if(!email || !password) {
+        throw AppError.from(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+    const user = await User.scope('withPassword').findOne({ where: { email } });
+    if(!user || !(await bcrypt.compare(password, user.password))) {
+        throw AppError.from(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+    const token = generateToken(user);
+    const safeUser = { id: user.id, fullName: user.fullName, email: user.email, role: user.role };
+    return { token, user: safeUser };
+}
+
+module.exports = { register, login };

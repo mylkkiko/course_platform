@@ -7,4 +7,14 @@ const register = asyncHandler(async(req, res) => {
     res.status(201).json({ success: true, data: user });
 });
 
-module.exports = { register };
+const login = asyncHandler(async(req, res) => {
+    const { email, password } = req.body;
+    const user = await authService.login({ email, password });
+    res.status(200).json({ success: true, data: user });
+});
+
+const me = (req, res) => {
+    res.status(200).json({ data: req.user });
+}
+
+module.exports = { register, login, me };
