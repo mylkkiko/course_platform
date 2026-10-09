@@ -17,6 +17,13 @@ const authenticate = asyncHandler(async (req, res, next) => {
     }
     req.user = user;
     next();
-})
+});
 
-module.exports = { authenticate };
+const authorize = (...roles) => (req, res, next) => {
+    if(!roles.includes(req.user.role)) {
+        throw AppError.from(AUTH_ERRORS.FORBIDDEN);
+    }
+    next();
+}
+
+module.exports = { authenticate, authorize };
