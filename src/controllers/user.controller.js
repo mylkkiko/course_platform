@@ -1,4 +1,4 @@
-const asyncHandler = require('../utils/AsyncHandler.js');
+const asyncHandler = require('../utils/asyncHandler.js');
 const userService = require('../services/user.service');
 
 const getAll = asyncHandler(async (req, res) => {

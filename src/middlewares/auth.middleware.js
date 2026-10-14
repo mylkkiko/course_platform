@@ -1,6 +1,6 @@
 const AUTH_ERRORS = require('../constants/errors/auth.errors');
 const AppError = require('../utils/AppError');
-const asyncHandler = require('../utils/AsyncHandler');
+const asyncHandler = require('../utils/asyncHandler');
 const { verifyToken } = require('../utils/jwt');
 const { User } = require('../models');
 
@@ -24,6 +24,22 @@ const authorize = (...roles) => (req, res, next) => {
         throw AppError.from(AUTH_ERRORS.FORBIDDEN);
     }
     next();
-}
+} 
 
-module.exports = { authenticate, authorize };
+const optionalAuthenticate = asyncHandler(async (req, res, next) => {
+    const header = req.headers.authorization;
+    if(!header) {
+        next();
+        return;
+    }
+    const token = header.split(' ')[1];
+    const payload = verifyToken(token);
+    const user = await User.findByPk(payload.id);
+    if(!user) {
+        throw AppError.from(AUTH_ERRORS.TOKEN_INVALID);
+    }
+    req.user = user;
+    next();
+})
+
+module.exports = { authenticate, authorize, optionalAuthenticate };
