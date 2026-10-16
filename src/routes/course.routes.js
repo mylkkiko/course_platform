@@ -1,5 +1,6 @@
 const express = require('express');
 const courseController = require('../controllers/course.controller');
+const lessonController = require('../controllers/lesson.controller');
 const router = express.Router();
 const { authenticate, authorize, optionalAuthenticate } = require('../middlewares/auth.middleware');
 const ROLES = require('../constants/roles');
@@ -11,5 +12,7 @@ router.post('/', authenticate, authorize(ROLES.INSTRUCTOR, ROLES.ADMIN), courseC
 router.put('/:id', authenticate, authorize(ROLES.INSTRUCTOR, ROLES.ADMIN), courseController.update);
 router.delete('/:id', authenticate, authorize(ROLES.INSTRUCTOR, ROLES.ADMIN), courseController.remove);
 router.get('/:id/students', authenticate, authorize(ROLES.INSTRUCTOR, ROLES.ADMIN), courseController.getStudents);
+router.get('/:courseId/lessons', authenticate, lessonController.getLessonsByCourse);
+router.post('/:courseId/lessons', authenticate, authorize(ROLES.INSTRUCTOR, ROLES.ADMIN), lessonController.create);
 
 module.exports = router;

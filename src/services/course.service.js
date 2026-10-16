@@ -1,6 +1,6 @@
 const COURSE_ERRORS = require("../constants/errors/course.errors");
 const ROLES = require("../constants/roles");
-const { Course, Lesson, User, Enrollment } = require("../models");
+const { Course, Lesson, User } = require("../models");
 const AppError = require("../utils/AppError");
 
 const create = async (data, user) => {
@@ -113,4 +113,4 @@ const getStudents = async (id, user) => {
     return std.students;
 }
 
-module.exports = { create, getAll, getMy, getById, update, remove, getStudents };
+module.exports = { create, getAll, getMy, getById, update, remove, getStudents, findOwnCourse };
