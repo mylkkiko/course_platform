@@ -5,6 +5,7 @@ const ENROLLMENT_ERRORS = {
     INVALID_PROGRESS: { statusCode: 400, message: 'Progress must be between 0 and 100' },
     CANCELLED: { statusCode: 400, message: 'Cancelled enrollment cannot be updated' },
     NOT_OWNER: { statusCode: 403, message: 'You can only manage your own enrollments' },
+    ALREADY_COMPLETED: { statusCode: 400, message: 'Course is already completed' }
 }
 
 module.exports = ENROLLMENT_ERRORS;

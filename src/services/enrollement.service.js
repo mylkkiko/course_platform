@@ -2,6 +2,7 @@ const COURSE_ERRORS = require('../constants/errors/course.errors');
 const ENROLLMENT_ERRORS = require('../constants/errors/enrollment.errors');
 const { Course, Enrollment, User } = require('../models');
 const AppError = require('../utils/AppError');
+const ROLES = require('../constants/roles');
 
 const enroll = async(courseId, user) => {
     const course = await Course.findByPk(courseId);
@@ -43,29 +44,59 @@ const getMy = async(user) => {
     return enrollments;
 }
 
-// const updateProgress = async(id, progress, user) => {
-//     const enrollment = await Enrollment.findByPk(id);
-//     if(!enrollment) {
-//         throw AppError.from(ENROLLMENT_ERRORS.NOT_FOUND);
-//     }
-//     const isOwner = enrollment.userId === user.id;
-//     if(!isOwner) {
-//         throw AppError.from(ENROLLMENT_ERRORS.NOT_OWNER);
-//     }
-//     if(enrollment.status === 'cancelled') {
-//         throw AppError.from(ENROLLMENT_ERRORS.CANCELLED);
-//     }
-//     if(progress < 0 || progress > 100) {
-//         throw AppError.from(ENROLLMENT_ERRORS.INVALID_PROGRESS);
-//     }
-//     if(!Number.isInteger(progress)) {
-//         throw AppError.from(ENROLLMENT_ERRORS.INVALID_PROGRESS);
-//     }
-//     if(progress === 100) {
-//         const updateEnrollment = await Enrollment.update({ status: 'completed' });
-//         return updateEnrollment.toJSON();
-//     }
+const updateProgress = async(id, progress, user) => {
+    const enrollment = await Enrollment.findByPk(id);
+    if(!enrollment) {
+        throw AppError.from(ENROLLMENT_ERRORS.NOT_FOUND);
+    }
+    const isOwner = enrollment.userId === user.id;
+    if(!isOwner) {
+        throw AppError.from(ENROLLMENT_ERRORS.NOT_OWNER);
+    }
+    if(enrollment.status === 'cancelled') {
+        throw AppError.from(ENROLLMENT_ERRORS.CANCELLED);
+    }
+    if(enrollment.status === 'completed') {
+        throw AppError.from(ENROLLMENT_ERRORS.ALREADY_COMPLETED);
+    }
+    if(progress < 0 || progress > 100) {
+        throw AppError.from(ENROLLMENT_ERRORS.INVALID_PROGRESS);
+    }
+    if(!Number.isInteger(progress)) {
+        throw AppError.from(ENROLLMENT_ERRORS.INVALID_PROGRESS);
+    }
+    if(progress === 100) {
+        const updateEnrollmentStatus = await enrollment.update({ status: 'completed', progress: 100 });
+        return updateEnrollmentStatus.toJSON();
+    }
+    const updateEnrollment = await enrollment.update({ progress: progress });
+    return updateEnrollment.toJSON();
+}
 
-// }
+const cancel = async(id, user) => {
+    const enrollment = await Enrollment.findByPk(id);
+    if(!enrollment) {
+        throw AppError.from(ENROLLMENT_ERRORS.NOT_FOUND);
+    }
+    const isOwner = enrollment.userId === user.id;
+    const isAdmin = user.role === ROLES.ADMIN;
+    if(!isOwner && !isAdmin) {
+        throw AppError.from(ENROLLMENT_ERRORS.NOT_OWNER);
+    }
+    if(enrollment.status === 'cancelled') {
+        throw AppError.from(ENROLLMENT_ERRORS.CANCELLED);
+    }
+    await enrollment.update({ status: 'cancelled' });
+}
 
-module.exports = { enroll, getMy }
+const getAll = async() => {
+    const studentEnrolments = await Enrollment.findAll({
+        include: [
+            {model: Course, as: 'course'},
+            {model: User, as: 'instructor', attributes: ['id', 'fullName', 'email']},
+        ]
+    });
+    return studentEnrolments;
+}
+
+module.exports = { enroll, getMy, updateProgress, cancel, getAll }
